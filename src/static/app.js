@@ -26,9 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
           participantsHTML = `
             <div class="participants-section">
               <strong>Participants:</strong>
-              <ul class="participants-list">
-                ${details.participants.map(email => `<li>${email}</li>`).join("")}
-              </ul>
+              <div class="participants-list">
+                ${details.participants.map(email => `
+                  <span class="participant-item">
+                    <span class="participant-email">${email}</span>
+                    <span class="delete-icon" title="Unregister" data-activity="${name}" data-email="${email}">&#10006;</span>
+                  </span>
+                `).join("")}
+              </div>
             </div>
           `;
         } else {
@@ -55,6 +60,29 @@ document.addEventListener("DOMContentLoaded", () => {
         option.value = name;
         option.textContent = name;
         activitySelect.appendChild(option);
+      });
+
+      // Add event listeners for delete icons
+      document.querySelectorAll('.delete-icon').forEach(icon => {
+        icon.addEventListener('click', async (e) => {
+          const activity = icon.getAttribute('data-activity');
+          const email = icon.getAttribute('data-email');
+          if (confirm(`Unregister ${email} from ${activity}?`)) {
+            try {
+              const response = await fetch(`/activities/${encodeURIComponent(activity)}/signup?email=${encodeURIComponent(email)}`, {
+                method: 'DELETE'
+              });
+              if (response.ok) {
+                fetchActivities(); // Refresh list
+              } else {
+                const data = await response.json();
+                alert(data.detail || 'Failed to unregister.');
+              }
+            } catch (err) {
+              alert('Error unregistering participant.');
+            }
+          }
+        });
       });
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
@@ -83,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh activities list after signup
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
