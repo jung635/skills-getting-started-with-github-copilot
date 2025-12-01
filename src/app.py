@@ -55,12 +55,56 @@ def get_activities():
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
+    if email in activities.get(activity_name, {}).get("participants", []):
+        raise HTTPException(status_code=400, detail="Student already signed up for this activity")
+    
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
 
     # Get the specific activity
     activity = activities[activity_name]
+    # Sports related activities
+    activities["Basketball Team"] = {
+        "description": "Join the school basketball team and compete in matches",
+        "schedule": "Wednesdays, 4:00 PM - 6:00 PM",
+        "max_participants": 15,
+        "participants": []
+    }
+    activities["Soccer Club"] = {
+        "description": "Practice soccer skills and play friendly games",
+        "schedule": "Mondays, 3:30 PM - 5:00 PM",
+        "max_participants": 18,
+        "participants": []
+    }
+
+    # Artistic activities
+    activities["Art Workshop"] = {
+        "description": "Explore painting, drawing, and other visual arts",
+        "schedule": "Thursdays, 3:30 PM - 5:00 PM",
+        "max_participants": 10,
+        "participants": []
+    }
+    activities["Drama Club"] = {
+        "description": "Act, direct, and produce school plays",
+        "schedule": "Fridays, 4:00 PM - 5:30 PM",
+        "max_participants": 20,
+        "participants": []
+    }
+
+    # Intellectual activities
+    activities["Math Olympiad"] = {
+        "description": "Prepare for math competitions and solve challenging problems",
+        "schedule": "Tuesdays, 4:00 PM - 5:00 PM",
+        "max_participants": 12,
+        "participants": []
+    }
+    activities["Science Club"] = {
+        "description": "Conduct experiments and explore scientific concepts",
+        "schedule": "Wednesdays, 3:30 PM - 5:00 PM",
+        "max_participants": 16,
+        "participants": []
+    }
 
     # Add student
     activity["participants"].append(email)
